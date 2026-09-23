@@ -9,30 +9,26 @@ data too closely. The model performs very well on training data but
 poorly on unseen data.
 """
 
-
-critique = {
-    "main_issues": [
-        "The response does not explain why overfitting occurs.",
-        "It does not provide a concrete example.",
-        "It does not mention ways to prevent overfitting."
-    ],
-    "improvements": [
-        "Explain how excessive model complexity can cause overfitting.",
-        "Add a simple decision-tree example.",
-        "Mention techniques such as regularization and cross-validation."
-    ],
-    "priority": "medium",
-    "critique_summary": (
-        "The response is accurate and clear but lacks "
-        "important supporting details."
-    )
+# This mimics what evaluator.evaluate_response() would return.
+evaluation = {
+    "accuracy": 10,
+    "accuracy_feedback": "The core definition given is correct.",
+    "completeness": 5,
+    "completeness_feedback": "Does not explain why overfitting happens, does not give a concrete example, and does not mention prevention techniques.",
+    "reasoning": 6,
+    "reasoning_feedback": "The explanation is stated but not justified with any underlying cause.",
+    "clarity": 9,
+    "clarity_feedback": "The answer is short and easy to read.",
+    "safety": 10,
+    "safety_feedback": "No safety concerns.",
+    "overall_score": 8.0
 }
 
 
 refined_response = refine_response(
     question,
     response,
-    critique
+    evaluation
 )
 
 
