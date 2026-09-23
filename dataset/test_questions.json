@@ -1,0 +1,187 @@
+[
+  {
+    "id": 1,
+    "category": "general_knowledge",
+    "difficulty": "easy",
+    "question": "What is the capital of France?"
+  },
+  {
+    "id": 2,
+    "category": "general_knowledge",
+    "difficulty": "easy",
+    "question": "What is the largest ocean on Earth?"
+  },
+  {
+    "id": 3,
+    "category": "general_knowledge",
+    "difficulty": "medium",
+    "question": "Why do different countries have different time zones?"
+  },
+  {
+    "id": 4,
+    "category": "general_knowledge",
+    "difficulty": "medium",
+    "question": "What are the main differences between renewable and non-renewable energy sources?"
+  },
+  {
+    "id": 5,
+    "category": "general_knowledge",
+    "difficulty": "hard",
+    "question": "Explain how globalization can affect both economic growth and income inequality."
+  },
+
+  {
+    "id": 6,
+    "category": "science",
+    "difficulty": "easy",
+    "question": "What is photosynthesis?"
+  },
+  {
+    "id": 7,
+    "category": "science",
+    "difficulty": "easy",
+    "question": "Why does ice float on water?"
+  },
+  {
+    "id": 8,
+    "category": "science",
+    "difficulty": "medium",
+    "question": "Why does the Earth have different seasons?"
+  },
+  {
+    "id": 9,
+    "category": "science",
+    "difficulty": "medium",
+    "question": "Explain the difference between a virus and a bacterium."
+  },
+  {
+    "id": 10,
+    "category": "science",
+    "difficulty": "hard",
+    "question": "Explain how greenhouse gases contribute to global warming."
+  },
+
+  {
+    "id": 11,
+    "category": "machine_learning",
+    "difficulty": "easy",
+    "question": "What is supervised learning in machine learning?"
+  },
+  {
+    "id": 12,
+    "category": "machine_learning",
+    "difficulty": "easy",
+    "question": "What is the difference between training data and test data?"
+  },
+  {
+    "id": 13,
+    "category": "machine_learning",
+    "difficulty": "medium",
+    "question": "What is overfitting in machine learning, and how can it be reduced?"
+  },
+  {
+    "id": 14,
+    "category": "machine_learning",
+    "difficulty": "medium",
+    "question": "What is the purpose of a loss function when training a machine learning model?"
+  },
+  {
+    "id": 15,
+    "category": "machine_learning",
+    "difficulty": "hard",
+    "question": "Explain the bias-variance trade-off and its relationship to model generalization."
+  },
+
+  {
+    "id": 16,
+    "category": "programming",
+    "difficulty": "easy",
+    "question": "What is a variable in programming?"
+  },
+  {
+    "id": 17,
+    "category": "programming",
+    "difficulty": "easy",
+    "question": "What is the difference between a list and a tuple in Python?"
+  },
+  {
+    "id": 18,
+    "category": "programming",
+    "difficulty": "medium",
+    "question": "What is recursion, and when might it be useful in programming?"
+  },
+  {
+    "id": 19,
+    "category": "programming",
+    "difficulty": "medium",
+    "question": "What is the difference between time complexity O(n) and O(n²)? Give an example of each."
+  },
+  {
+    "id": 20,
+    "category": "programming",
+    "difficulty": "hard",
+    "question": "Explain the difference between a process and a thread and describe one situation where multithreading can be useful."
+  },
+
+  {
+    "id": 21,
+    "category": "mathematics",
+    "difficulty": "easy",
+    "question": "What is the value of 15 × 8?"
+  },
+  {
+    "id": 22,
+    "category": "mathematics",
+    "difficulty": "easy",
+    "question": "What is the difference between mean, median, and mode?"
+  },
+  {
+    "id": 23,
+    "category": "mathematics",
+    "difficulty": "medium",
+    "question": "If a number is increased by 20% and then decreased by 20%, is the final value equal to the original value? Explain why."
+  },
+  {
+    "id": 24,
+    "category": "mathematics",
+    "difficulty": "medium",
+    "question": "A car travels 180 kilometers in 3 hours. What is its average speed?"
+  },
+  {
+    "id": 25,
+    "category": "mathematics",
+    "difficulty": "hard",
+    "question": "Explain why the probability of obtaining two heads when tossing a fair coin twice is 1/4."
+  },
+
+  {
+    "id": 26,
+    "category": "reasoning",
+    "difficulty": "easy",
+    "question": "If all cats are animals and some animals are black, can we conclude that all cats are black? Explain."
+  },
+  {
+    "id": 27,
+    "category": "reasoning",
+    "difficulty": "medium",
+    "question": "A train leaves Station A at 10:00 AM and travels at 60 km/h. Another train leaves Station B, 180 km away, at 11:00 AM and travels toward Station A at 30 km/h. At what time will the trains meet?"
+  },
+  {
+    "id": 28,
+    "category": "reasoning",
+    "difficulty": "medium",
+    "question": "A doctor tells a patient to take three tablets, one every 30 minutes. How long will it take to take all three tablets?"
+  },
+  {
+    "id": 29,
+    "category": "reasoning",
+    "difficulty": "hard",
+    "question": "A statement says: 'If it rains, the ground becomes wet.' The ground is wet. Can we conclude that it rained? Explain your reasoning."
+  },
+  {
+    "id": 30,
+    "category": "reasoning",
+    "difficulty": "hard",
+    "question": "A person claims that a new teaching method is effective because students who used it scored higher on an exam. What additional information would you need before concluding that the teaching method caused the improvement?"
+  }
+]
