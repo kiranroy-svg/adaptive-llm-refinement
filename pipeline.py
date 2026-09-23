@@ -4,9 +4,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from evaluation.evaluator import evaluate_response
-from evaluation.decision_controller import decide_refinement
+from evaluation.decision_controller import decide_refinement, DEFAULT_THRESHOLD
 
-from refinement.critic import generate_critique
 from refinement.refiner import refine_response
 
 
@@ -31,7 +30,7 @@ GENERATOR_MODEL = "openai/gpt-oss-20b"
 
 
 # ==========================================
-# GENERATOR
+# GENERATOR (initial LLM)
 # ==========================================
 
 def generate_response(question):
@@ -62,196 +61,68 @@ def generate_response(question):
 # ADAPTIVE REFINEMENT PIPELINE
 # ==========================================
 
-def adaptive_refinement(
-    question,
-    initial_response,
-    max_iterations=2
-):
+def adaptive_refinement(question, initial_response, threshold=DEFAULT_THRESHOLD):
+    """
+    Implements exactly this flow:
 
-    current_response = initial_response
+    1. Judge scores the initial response on 5 dimensions + overall score + per-metric feedback.
+    2. If overall score >= threshold -> return initial response as-is.
+    3. If overall score < threshold -> send question + initial response + feedback
+       back to the SAME generator LLM to produce a refined response.
+    4. Judge scores the refined response the same way.
+    5. Compare both overall scores. Return whichever response scored higher.
+    """
 
-    history = []
+    print("\nEvaluating initial response...")
+    initial_evaluation = evaluate_response(question, initial_response)
+    initial_score = initial_evaluation["overall_score"]
+    print(f"Initial Overall Score: {initial_score}/10")
 
-    for iteration in range(max_iterations + 1):
-
-        print(f"\n{'=' * 60}")
-        print(f"ITERATION {iteration}")
-        print(f"{'=' * 60}")
-
-        # -------------------------------
-        # Evaluate
-        # -------------------------------
-
-        print("\nEvaluating response...")
-
-        evaluation = evaluate_response(
-            question,
-            current_response
-        )
-
-        score = evaluation["overall_score"]
-
-        print(f"Overall Score: {score}/10")
-
-        # -------------------------------
-        # Store history
-        # -------------------------------
-
-        history.append({
-            "iteration": iteration,
-            "response": current_response,
-            "evaluation": evaluation
-        })
-
-        # -------------------------------
-        # Decision
-        # -------------------------------
-
-        decision = decide_refinement(evaluation)
-
-        print(
-            f"Refinement Required: "
-            f"{decision['refinement_required']}"
-        )
-
-        print(
-            f"Reason: {decision['reason']}"
-        )
-
-        # -------------------------------
-        # Good enough
-        # -------------------------------
-
-        if not decision["refinement_required"]:
-
-            print(
-                "\nResponse meets quality requirements."
-            )
-
-            return {
-                "final_response": current_response,
-                "final_evaluation": evaluation,
-                "iterations": iteration,
-                "history": history
-            }
-
-        # -------------------------------
-        # Maximum iterations
-        # -------------------------------
-
-        if iteration == max_iterations:
-
-            print(
-                "\nMaximum refinement iterations reached."
-            )
-
-            break
-
-        # -------------------------------
-        # Critic
-        # -------------------------------
-
-        print("\nGenerating critique...")
-
-        critique = generate_critique(
-            question,
-            current_response,
-            evaluation
-        )
-
-        print("\nCritique:")
-        print(
-            critique["critique_summary"]
-        )
-
-        # -------------------------------
-        # Refiner
-        # -------------------------------
-
-        print(
-            "\nGenerating refined response..."
-        )
-
-        refined_response = refine_response(
-            question,
-            current_response,
-            critique
-        )
-
-        # -------------------------------
-        # Re-evaluate refined response
-        # -------------------------------
-
-        print(
-            "\nEvaluating refined response..."
-        )
-
-        refined_evaluation = evaluate_response(
-            question,
-            refined_response
-        )
-
-        refined_score = (
-            refined_evaluation["overall_score"]
-        )
-
-        print(
-            f"Refined Score: {refined_score}/10"
-        )
-
-        # -------------------------------
-        # Compare
-        # -------------------------------
-
-        if refined_score > score:
-
-            print(
-                f"\nImprovement detected: "
-                f"{score} → {refined_score}"
-            )
-
-            current_response = refined_response
-
-            history.append({
-                "iteration": iteration + 0.5,
-                "response": refined_response,
-                "evaluation": refined_evaluation,
-                "critique": critique
-            })
-
-        else:
-
-            print(
-                f"\nRefinement did not improve "
-                f"the score: {score} → {refined_score}"
-            )
-
-            print(
-                "Keeping the previous response."
-            )
-
-            return {
-                "final_response": current_response,
-                "final_evaluation": evaluation,
-                "iterations": iteration,
-                "history": history
-            }
+    decision = decide_refinement(initial_evaluation, threshold=threshold)
+    print(f"Refinement Required: {decision['refinement_required']}")
+    print(f"Reason: {decision['reason']}")
 
     # -------------------------------
-    # Select best response
+    # Good enough as-is
     # -------------------------------
+    if not decision["refinement_required"]:
+        return {
+            "final_response": initial_response,
+            "final_evaluation": initial_evaluation,
+            "refined": False,
+            "initial_evaluation": initial_evaluation,
+            "refined_evaluation": None
+        }
 
-    best_entry = max(
-        history,
-        key=lambda item:
-        item["evaluation"]["overall_score"]
-    )
+    # -------------------------------
+    # Refine using the same LLM + judge feedback
+    # -------------------------------
+    print("\nSending feedback back to the initial LLM for refinement...")
+    refined_response = refine_response(question, initial_response, initial_evaluation)
+
+    print("\nEvaluating refined response...")
+    refined_evaluation = evaluate_response(question, refined_response)
+    refined_score = refined_evaluation["overall_score"]
+    print(f"Refined Overall Score: {refined_score}/10")
+
+    # -------------------------------
+    # Compare both scores, keep the better one
+    # -------------------------------
+    if refined_score > initial_score:
+        print(f"\nImprovement detected: {initial_score} -> {refined_score}. Using refined response.")
+        final_response = refined_response
+        final_evaluation = refined_evaluation
+    else:
+        print(f"\nRefinement did not improve the score: {initial_score} -> {refined_score}. Keeping initial response.")
+        final_response = initial_response
+        final_evaluation = initial_evaluation
 
     return {
-        "final_response": best_entry["response"],
-        "final_evaluation": best_entry["evaluation"],
-        "iterations": max_iterations,
-        "history": history
+        "final_response": final_response,
+        "final_evaluation": final_evaluation,
+        "refined": True,
+        "initial_evaluation": initial_evaluation,
+        "refined_evaluation": refined_evaluation
     }
 
 
@@ -259,41 +130,27 @@ def adaptive_refinement(
 # MAIN ASSISTANT FUNCTION
 # ==========================================
 
-def run_assistant(question):
+def run_assistant(question, threshold=DEFAULT_THRESHOLD):
 
     print("\nGenerating initial response...")
-
-    initial_response = generate_response(
-        question
-    )
+    initial_response = generate_response(question)
 
     print("\nInitial Response")
     print("=" * 60)
     print(initial_response)
 
-    result = adaptive_refinement(
-        question,
-        initial_response,
-        max_iterations=2
-    )
+    result = adaptive_refinement(question, initial_response, threshold=threshold)
 
     print("\n")
     print("=" * 60)
     print("FINAL RESPONSE")
     print("=" * 60)
-
     print(result["final_response"])
 
     print("\nFinal Score:")
+    print(f"{result['final_evaluation']['overall_score']}/10")
 
-    print(
-        f"{result['final_evaluation']['overall_score']}/10"
-    )
-
-    print(
-        f"\nRefinement Iterations: "
-        f"{result['iterations']}"
-    )
+    print(f"\nRefinement Occurred: {result['refined']}")
 
     return result
 
@@ -304,8 +161,6 @@ def run_assistant(question):
 
 if __name__ == "__main__":
 
-    question = input(
-        "\nEnter your question: "
-    )
+    question = input("\nEnter your question: ")
 
     run_assistant(question)
