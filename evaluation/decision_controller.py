@@ -1,4 +1,4 @@
-DEFAULT_THRESHOLD = 8.0
+DEFAULT_THRESHOLD = 9.5
 
 
 def decide_refinement(evaluation, threshold=DEFAULT_THRESHOLD):
