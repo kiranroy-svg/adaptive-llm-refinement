@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-
 load_dotenv()
 
 api_key = os.getenv("GROQ_API_KEY")
@@ -16,53 +15,58 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
-
+# Same model as the initial generator, since the initial LLM
+# itself is the one producing the refined response.
 REFINER_MODEL = "openai/gpt-oss-20b"
 
 
-def refine_response(question, response, critique):
+def _build_feedback_block(evaluation):
+    """
+    Turns the judge's per-metric scores and feedback into a
+    readable block of text to hand back to the generator LLM.
+    """
 
-    issues = "\n".join(
-        f"- {issue}"
-        for issue in critique["main_issues"]
-    )
+    return f"""Accuracy ({evaluation['accuracy']}/10): {evaluation['accuracy_feedback']}
+Completeness ({evaluation['completeness']}/10): {evaluation['completeness_feedback']}
+Reasoning ({evaluation['reasoning']}/10): {evaluation['reasoning_feedback']}
+Clarity ({evaluation['clarity']}/10): {evaluation['clarity_feedback']}
+Safety ({evaluation['safety']}/10): {evaluation['safety_feedback']}"""
 
-    improvements = "\n".join(
-        f"- {improvement}"
-        for improvement in critique["improvements"]
-    )
 
-    refinement_prompt = f"""
-You are an expert AI response editor.
+def refine_response(question, previous_response, evaluation):
+    """
+    Sends the original query, the initial LLM's own previous
+    response, and the judge's per-metric feedback back to the
+    SAME generator model, and asks it to produce an improved
+    response.
 
-Improve the original response using the critic's feedback.
+    This replaces a separate critic step: the judge's feedback
+    goes straight back to the generator LLM instead of being
+    rewritten into issues/improvements by a third model first.
+    """
 
-USER QUESTION:
+    feedback_block = _build_feedback_block(evaluation)
+
+    refinement_prompt = f"""You previously answered the question below. An evaluator has
+scored your answer on five dimensions and given feedback on each.
+Use this feedback to write an improved answer.
+
+ORIGINAL QUESTION:
 {question}
 
-ORIGINAL RESPONSE:
-{response}
+YOUR ORIGINAL ANSWER:
+{previous_response}
 
-CRITIC IDENTIFIED THESE ISSUES:
-{issues}
-
-RECOMMENDED IMPROVEMENTS:
-{improvements}
-
-CRITIQUE SUMMARY:
-{critique["critique_summary"]}
+EVALUATOR FEEDBACK (score / reason for each dimension):
+{feedback_block}
 
 Instructions:
-
-1. Answer the original user question directly.
-2. Correct any identified problems.
-3. Add missing information identified by the critic.
-4. Improve weak reasoning where necessary.
-5. Improve clarity and structure.
-6. Do not introduce unsupported claims.
-7. Do not mention the critic, evaluator, or refinement process.
-8. Do not explain what you changed.
-9. Return ONLY the improved answer.
+1. Answer the original question directly.
+2. Address the specific weaknesses mentioned in the feedback above.
+3. Do not introduce unsupported claims.
+4. Do not mention the evaluator, the scores, or this feedback in your answer.
+5. Do not explain what you changed.
+6. Return ONLY the improved answer.
 """
 
     result = client.chat.completions.create(
@@ -71,8 +75,8 @@ Instructions:
             {
                 "role": "system",
                 "content": (
-                    "You are an expert editor who improves "
-                    "AI-generated responses."
+                    "You are a helpful AI assistant revising your own "
+                    "previous answer based on evaluator feedback."
                 )
             },
             {
