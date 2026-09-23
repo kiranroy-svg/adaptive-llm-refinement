@@ -1,52 +1,33 @@
-REFINEMENT_THRESHOLD = 8.0
-DIMENSION_THRESHOLD = 6.0
+DEFAULT_THRESHOLD = 8.0
 
 
-def decide_refinement(evaluation):
+def decide_refinement(evaluation, threshold=DEFAULT_THRESHOLD):
+    """
+    Decides whether a response needs refinement.
+
+    If overall_score >= threshold: response is good enough, return as-is.
+    If overall_score < threshold: refinement is triggered.
+
+    threshold is a parameter (not a hardcoded constant) so that
+    experiments can run the exact same pipeline at different
+    threshold values (e.g. 6, 7, 8, 9) without editing this file.
+    """
 
     overall_score = evaluation["overall_score"]
 
-    dimensions = {
-        "accuracy": evaluation["accuracy"],
-        "completeness": evaluation["completeness"],
-        "reasoning": evaluation["reasoning"],
-        "clarity": evaluation["clarity"],
-        "safety": evaluation["safety"]
-    }
-
-    weak_dimensions = [
-        dimension
-        for dimension, score in dimensions.items()
-        if score < DIMENSION_THRESHOLD
-    ]
-
-    if overall_score < REFINEMENT_THRESHOLD:
-
+    if overall_score >= threshold:
         return {
-            "refinement_required": True,
+            "refinement_required": False,
             "reason": (
-                f"Overall score {overall_score} is below "
-                f"the threshold {REFINEMENT_THRESHOLD}."
-            ),
-            "weak_dimensions": weak_dimensions
-        }
-
-    if weak_dimensions:
-
-        return {
-            "refinement_required": True,
-            "reason": (
-                f"The response has weak dimensions: "
-                f"{', '.join(weak_dimensions)}."
-            ),
-            "weak_dimensions": weak_dimensions
+                f"Overall score {overall_score} meets or exceeds "
+                f"the threshold {threshold}."
+            )
         }
 
     return {
-        "refinement_required": False,
+        "refinement_required": True,
         "reason": (
-            f"Response quality is acceptable. "
-            f"Overall score: {overall_score}."
-        ),
-        "weak_dimensions": []
+            f"Overall score {overall_score} is below "
+            f"the threshold {threshold}."
+        )
     }
