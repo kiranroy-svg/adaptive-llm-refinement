@@ -21,12 +21,9 @@ evaluation = evaluate_response(
 print("\nEvaluation Result")
 print("=" * 50)
 
-print(f"Accuracy:       {evaluation['accuracy']}/10")
-print(f"Completeness:   {evaluation['completeness']}/10")
-print(f"Reasoning:      {evaluation['reasoning']}/10")
-print(f"Clarity:        {evaluation['clarity']}/10")
-print(f"Safety:         {evaluation['safety']}/10")
+print(f"Accuracy:       {evaluation['accuracy']}/10 - {evaluation['accuracy_feedback']}")
+print(f"Completeness:   {evaluation['completeness']}/10 - {evaluation['completeness_feedback']}")
+print(f"Reasoning:      {evaluation['reasoning']}/10 - {evaluation['reasoning_feedback']}")
+print(f"Clarity:        {evaluation['clarity']}/10 - {evaluation['clarity_feedback']}")
+print(f"Safety:         {evaluation['safety']}/10 - {evaluation['safety_feedback']}")
 print(f"Overall Score:  {evaluation['overall_score']}/10")
-
-print("\nFeedback:")
-print(evaluation["feedback"])
