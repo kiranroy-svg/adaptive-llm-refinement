@@ -152,6 +152,7 @@ def run_assistant(question, threshold=DEFAULT_THRESHOLD):
 
     print(f"\nRefinement Occurred: {result['refined']}")
 
+    result["initial_response"] = initial_response
     return result
 
 
