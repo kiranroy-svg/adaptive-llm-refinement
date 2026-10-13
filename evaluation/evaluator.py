@@ -44,9 +44,14 @@ AI RESPONSE:
 {response}
 
 Evaluate the response on these five dimensions. For EACH dimension,
-give a score from 0 to 10 AND a short piece of feedback explaining
-specifically why it received that score (what was good, what was
-missing or wrong).
+give a score from 0 to 10 AND short feedback. Each piece of feedback
+must contain two things:
+  (a) why it received that score, and
+  (b) one specific, concrete change the author should make to improve
+      it (e.g. "add an example of X", "correct the claim that Y",
+      "explain why Z happens"). Even for high scores, name something
+      concrete that could still be improved. Do not give vague advice
+      like "be more detailed".
 
 1. Accuracy:
 Is the information factually correct?
