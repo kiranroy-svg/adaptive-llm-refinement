@@ -100,6 +100,10 @@ def adaptive_refinement(question, initial_response, threshold=DEFAULT_THRESHOLD)
     print("\nSending feedback back to the initial LLM for refinement...")
     refined_response = refine_response(question, initial_response, initial_evaluation)
 
+    print("\nRefined Response (candidate)")
+    print("=" * 60)
+    print(refined_response)
+
     print("\nEvaluating refined response...")
     refined_evaluation = evaluate_response(question, refined_response)
     refined_score = refined_evaluation["overall_score"]
