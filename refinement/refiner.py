@@ -17,7 +17,7 @@ client = OpenAI(
 
 # Must be the SAME model as the initial generator in pipeline.py,
 # because the initial LLM itself produces the refined response.
-REFINER_MODEL = "openai/gpt-oss-20b"
+REFINER_MODEL = "qwen/qwen3.8-27b"
 
 _DIMENSIONS = ["accuracy", "completeness", "reasoning", "clarity", "safety"]
 
