@@ -1,4 +1,5 @@
 import os
+import difflib
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -26,7 +27,7 @@ client = OpenAI(
 )
 
 
-GENERATOR_MODEL = "openai/gpt-oss-20b"
+GENERATOR_MODEL = "qwen/qwen3.8-27b"
 
 
 # ==========================================
@@ -90,6 +91,9 @@ def adaptive_refinement(question, initial_response, threshold=DEFAULT_THRESHOLD)
             "final_response": initial_response,
             "final_evaluation": initial_evaluation,
             "refined": False,
+            "selected": "initial",
+            "initial_response": initial_response,
+            "refined_response": None,
             "initial_evaluation": initial_evaluation,
             "refined_evaluation": None
         }
@@ -125,10 +129,50 @@ def adaptive_refinement(question, initial_response, threshold=DEFAULT_THRESHOLD)
         "final_response": final_response,
         "final_evaluation": final_evaluation,
         "refined": True,
+        "selected": "refined" if final_response is refined_response else "initial",
+        "initial_response": initial_response,
+        "refined_response": refined_response,
         "initial_evaluation": initial_evaluation,
         "refined_evaluation": refined_evaluation
     }
 
+
+
+# ==========================================
+# INITIAL vs FINAL COMPARISON
+# ==========================================
+
+def print_comparison(result):
+    """
+    Shows whether the final response differs from the initial one,
+    and why (threshold passed, refinement rejected, or refinement kept).
+    """
+
+    initial = result["initial_response"]
+    final = result["final_response"]
+    initial_score = result["initial_evaluation"]["overall_score"]
+
+    print("\n" + "=" * 60)
+    print("INITIAL vs FINAL COMPARISON")
+    print("=" * 60)
+    print(f"Initial score : {initial_score}")
+
+    if not result["refined"]:
+        print("Refined score : (not generated - initial response passed the threshold)")
+        print("Final response: SAME as initial (by design, no refinement ran)")
+        return
+
+    refined_score = result["refined_evaluation"]["overall_score"]
+    similarity = difflib.SequenceMatcher(None, initial, result["refined_response"]).ratio()
+
+    print(f"Refined score : {refined_score}")
+    print(f"Text similarity (initial vs refined candidate): {similarity:.0%}")
+    print(f"Selected      : {result['selected'].upper()} response")
+
+    if final == initial:
+        print("Final response: SAME as initial (refined candidate did not score higher)")
+    else:
+        print("Final response: DIFFERENT from initial (refined candidate scored higher)")
 
 # ==========================================
 # MAIN ASSISTANT FUNCTION
@@ -155,6 +199,8 @@ def run_assistant(question, threshold=DEFAULT_THRESHOLD):
     print(f"{result['final_evaluation']['overall_score']}/10")
 
     print(f"\nRefinement Occurred: {result['refined']}")
+
+    print_comparison(result)
 
     return result
 
