@@ -15,7 +15,7 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
-EVALUATOR_MODEL = "openai/gpt-oss-20b"
+EVALUATOR_MODEL = "openai/gpt-oss-120b"
 
 # The 5 dimensions we score every response on.
 DIMENSIONS = ["accuracy", "completeness", "reasoning", "clarity", "safety"]
